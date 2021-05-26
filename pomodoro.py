@@ -13,9 +13,8 @@ import datetime
 from pathlib import Path
 from pydub import AudioSegment
 from pydub.playback import play
-import io
-import contextlib
-
+# import io, os
+# import contextlib
 # from playsound import playsound
 
 # %%
@@ -43,7 +42,7 @@ def readPomodoroIndex(pomodoro):
 # %%
 def writeData(df, mode, write_file):
     pathDir = "/".join([str(Path.home()), "Nextcloud", ".pomodoro"])
-    fileName = {"pomodoro": "pomodoro.csv"}
+    fileName = {"pomodoro": "test.csv"}
     with open("{a}/{b}".format(a=pathDir, b=fileName[write_file]), mode) as f:
         df.to_csv(f, sep=",", index=False, header=False, index_label="index")
     # df.to_csv("{a}/{b}".format(a=pathDir, b=fileName[write_file]), mode=mode,
@@ -197,13 +196,26 @@ def countdown(chosenOne, metaData):
 
     return 0
 
+def taskList():
+    tasks=["adsII", "os", "esy", "epl", "-"]
 
+    return tasks
 # %%
 def parseArgs(pomodoro):
-    help_txt = programStructure()
+    mergeTxt=lambda x : ", ".join(x)
+
+    help_txt=programStructure()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", "-t", action="store_true", default=False)
+    parser.add_argument(
+        "--task",
+        "-t",
+        type=str,
+        default="",
+        choices=help_txt["taskList"],
+        metavar="str",
+        help=mergeTxt(help_txt["taskList"]),
+    )
     parser.add_argument(
         "--comment",
         "-c",
@@ -211,49 +223,47 @@ def parseArgs(pomodoro):
         default="",
         choices=help_txt["commentList"],
         metavar="str",
-        help=help_txt["commentList_h"],
+        help=mergeTxt(help_txt["commentList"]),
     )
     parser.add_argument(
         "--pomodoro",
         "-p",
         type=str,
         default="",
+        choices=help_txt["pomodoro_c"],
+        metavar="str",
+        help=help_txt["pomodoro_h"] + readPomodoroIndex(pomodoro),
+    )
+    parser.add_argument(
+        "--stat",
+        "-s",
+        type=str,
+        default="",
+        choices=help_txt["pomodoro_c"],
         metavar="str",
         help=help_txt["pomodoro_h"] + readPomodoroIndex(pomodoro),
     )
     argcomplete.autocomplete(parser)
+
     return parser.parse_args()
 
 
 # %%
-def confirmPomodoro(inputs, pomodoro, pomodoroInputIndex, commentList):
+def execPomodoro(inputs, pomodoroInputIndex):
     # TODO implement proper checking protocol
-    txt = ""
-    chosenOne = ""
-    pomodoros = inputs.pomodoro
-    if inputs.pomodoro in pomodoroInputIndex.keys():
-        chosenOne = pomodoroInputIndex[pomodoros]
-        txt += "starting pomodoro '{input}'".format(input=chosenOne)
+    chosenOne=pomodoroInputIndex[inputs.pomodoro]
+    txt = "starting pomodoro: '{input}'".format(input=chosenOne)
+
+    job=list(filter(lambda x: x!="",[inputs.comment,inputs.task]))
+
+    if len(job)==1:
+        txt += " => '{cmnt}'".format(cmnt=job[0])
     else:
-        print(
-            "-p flag option '{input}' not know, check: 'pomodoro.py -h'".format(
-                input=pomodoros
-            )
-        )
+        print("use one of the flag: -c, -t")
         exit()
 
-    comments = inputs.comment
-    if comments in commentList or comments[0] == ":":
-        txt += " => '{cmnt}'".format(cmnt=comments)
-    else:
-        print(
-            "-c flag option '{input}' not know, check: 'pomodoro.py -h'".format(
-                input=comments
-            )
-        )
-        exit()
     print(txt)
-    return pomodoro[chosenOne]
+    return [chosenOne ,job[0]]
 
 
 # %%
@@ -261,8 +271,8 @@ def programStructure():
     struc = {
         "pomodoro": list(),
         "pomodoro_h": "",
-        "commentList": ["exercise", "morning", "cook", "food", "clean", "media", ""],
-        "commentList_h": "",
+        "taskList": taskList() ,
+        "commentList": ["exercise", "morning", "cook", "food", "clean", "media"]
     }
 
     pomodoroStructure = namedtuple(
@@ -296,7 +306,6 @@ def programStructure():
 
     struc["pomodoro"].extend([pomodoroIndex, pomodoroInputIndex, pomodoro])
 
-    struc["commentList_h"] = ", ".join(struc["commentList"]) + '""'
 
     return struc
 
@@ -308,12 +317,11 @@ def main():
     pomodoroIndex, pomodoroInputIndex, pomodoro = programStr["pomodoro"]
 
     inputs = parseArgs(pomodoro)
-    chosenOne = confirmPomodoro(
-        inputs, pomodoro, pomodoroInputIndex, programStr["commentList"]
-    )
-    metaData = {"task": inputs.task, "comment": inputs.comment}
-    # print(inputs.comment)
-    countdown(chosenOne, metaData)
+    if(inputs.stat == ""):
+        chosenOne,job = execPomodoro(inputs, pomodoroInputIndex)
+        metaData = {"task": job in programStr["taskList"] , "comment": job}
+        # print(metaData)
+        # countdown(pomodoro[chosenOne], metaData)
     # print(chosenOne.shortbreak)
     # readPomodoroIndex(pomodoroIndex)
 
