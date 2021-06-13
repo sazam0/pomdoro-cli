@@ -1,0 +1,38 @@
+{
+"minute":"60",
+"music":{
+  "p":"sound/after_pomodoro.wav",
+  "l":"sound/after_long_break.wav",
+  "s":"sound/after_short_break.wav"
+},
+"fileName":{
+  "pomodoro":"pomodoro.csv",
+  "config":"config.json"
+},
+"pomodoroStructure":{
+"Pomodoro":["name", "index", "pomodoro", "shortbreak", "longbreak", "interval"]
+},
+"pomodoro":{
+  "common":["c","25","5","30","4"],
+  "moderate":["m","45","15","30","4"],
+  "longer":["l","55","20","30","3"],
+  "marathon":["M","90","30","45","3"],
+  "exercise":["e","2","1","5","5"],
+  "test":["-","3","2","4","2"]
+},
+"datetimeStamp":{
+  "year": "%Y",
+  "month": "%b",
+  "month_num": "%m",
+  "date": "%d",
+  "week": "%W",
+  "day": "%a",
+  "hour": "%H",
+  "date_": "%d/%m/%Y",
+  "day_night": "%p"
+},
+"datetimeIndex":"%W%Y%m%d%H%M%S"
+
+
+
+}
