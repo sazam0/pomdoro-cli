@@ -28,9 +28,9 @@ def weeks(deck,past):
     return [deck_past,tmpGrp]
 
 def init(flag,df,datetimeStamp):
-    constants=dict()
-    with open('constants.json') as f:
-        constants=json.load(f)
+    # constants=dict()
+    # with open('constants.json') as f:
+    #     constants=json.load(f)
 
     x = datetime.now()
     # today={i:diff.strftime(j) for i,j in constants['datetimeStamp'].items()}
