@@ -42,6 +42,7 @@ def getTaskList():
     boardId=pd.DataFrame(boardId).sort_values(by=['duedate'])
     boardId['duedate']=boardId['duedate'].apply(lambda x :x.strftime('%d-%m-%Y'))
     boardId=boardId.head(7).reset_index(drop=True).to_dict('index')
-    return [list(boardId.keys()),boardId]
+    # return [list(boardId.keys()),boardId]
+    return boardId
 
 # %%
