@@ -1,2 +1,25 @@
-* requirements
+terminal pomodoro app for nextcloud deck cards.
+
+* setup
+** requirements
+#+begin_src sh
 sudo apt-get install -y python3-dev libasound2-dev
+#+end_src
+** sound files
+put your sound (notification) files in sound directory. set your filenames in ~constants.json~.
+** environment
+create a file named =.env= and put the following configuration.
+#+begin_src sh
+username = '<nextcloud user name>'
+password='<nextcloud account password>'
+base_url='https://<nextcloud url>/index.php/apps/deck/api/v1.0/boards'
+storage_dir='<location of config directory>'
+config_dir='<location of cloned directory>'
+constant_var='constants.json'
+#+end_src
+
+* Usage
+** help
+#+begin_src sh
+pomodoro.py -h
+#+end_src
