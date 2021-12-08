@@ -1,5 +1,4 @@
 __pycache__/
-sound/
 *.wav
 .env
 Pipfile
