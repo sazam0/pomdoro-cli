@@ -36,13 +36,16 @@ def cards(board):
 # %%
 def getTaskList():
     id,job=[],[]
+    taskList={-1: {'job': 'default', 'duedate':'01-01-2020'}}
     base_df=deck()
     boardId=list(map(cards,list(base_df.to_dict('index').values())))
     boardId=[j for i in boardId if len(i)>0 for j in i]
     boardId=pd.DataFrame(boardId).sort_values(by=['duedate'])
     boardId['duedate']=boardId['duedate'].apply(lambda x :x.strftime('%d-%m-%Y'))
     boardId=boardId.head(7).reset_index(drop=True).to_dict('index')
+    # add default task
+    taskList.update(boardId)
     # return [list(boardId.keys()),boardId]
-    return boardId
+    return taskList
 
 # %%
