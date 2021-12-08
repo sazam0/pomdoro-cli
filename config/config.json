@@ -1,0 +1,18 @@
+{
+  "errand": [
+    "exercise"
+  ],
+  "history": {
+    "1": [
+      "c",
+      "default",
+      true
+    ],
+  },
+  "task": {
+    "-1": {
+      "job": "default",
+      "duedate": "01-01-2020"
+    }
+  }
+}
