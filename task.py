@@ -36,7 +36,7 @@ def cards(board):
 # %%
 def getTaskList():
     id,job=[],[]
-    taskList={-1: {'job': 'default', 'duedate':'01-01-2020'}}
+    taskList={100: {'job': 'default', 'duedate':'01-01-2020'}}
     base_df=deck()
     boardId=list(map(cards,list(base_df.to_dict('index').values())))
     boardId=[j for i in boardId if len(i)>0 for j in i]
