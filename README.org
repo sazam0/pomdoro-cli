@@ -13,8 +13,8 @@ create a file named =.env= and put the following configuration.
 username = '<nextcloud user name>'
 password='<nextcloud account password>'
 base_url='https://<nextcloud url>/index.php/apps/deck/api/v1.0/boards'
-storage_dir='<location of config directory>'
-config_dir='<location of cloned directory>'
+storage_dir='<location of config directory with respect to home directory>'
+config_dir='<location of cloned directory with respect to home directory>'
 constant_var='constants.json'
 #+end_src
 
