@@ -14,19 +14,29 @@ def deck():
 
 # %%
 def cards(board):
+    filtered_lists=["Done","Archieve"]
+    l_filtered_lists=[i.lower() for i in filtered_lists]
+    u_filtered_lists=[i.upper() for i in filtered_lists]
+    filtered_lists=filtered_lists+l_filtered_lists+u_filtered_lists
+
     singleBoard=config_env('base_url')+"/{boardId}/stacks"
     deck=board['deck']
     addId=lambda x : "{arg1} :: {arg2}".format(arg1=deck,arg2=x)
     resp = requests.get(singleBoard.format(boardId=board['id']),
         auth=HTTPBasicAuth(config_env('username'),config_env('password')))
     level2=pd.DataFrame(data=resp.json())
-    level2=level2[~level2['title'].isin(["Done","Archieve"])]
+    level2=level2[~level2['title'].isin(filtered_lists)]
     try:
         level2=level2[level2.cards.notnull()][['cards']]
     except AttributeError:
         return []
     # level2
     cards=pd.concat(map(lambda x: pd.DataFrame(x),level2['cards']))
+    # filter labels
+    cards['labels']=cards['labels'].apply(lambda x: list(
+        x)[0]['title'] if len(list(x)) > 0 else 'nan')
+    cards = cards[cards['labels'].isin(['To review', 'Action needed', 'nan'])]
+
     cards=cards[cards['archived']==False][["title","duedate"]]
     cards["duedate"]=pd.to_datetime(cards["duedate"]).dt.date
     cards['job']=cards['title'].apply(addId)
