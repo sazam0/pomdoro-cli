@@ -26,6 +26,8 @@ from rich.style import Style
 from rich.progress import track
 from rich.progress import Progress
 from rich.logging import RichHandler
+import subprocess
+
 # import contextlib
 # from pydub import AudioSegment
 # from pydub.playback import play
@@ -410,43 +412,43 @@ def programStructure():
     struc["pomodoro"].extend([pomodoroInputIndex, pomodoro])
     return struc
 
-
+# %%
 def stats(flag):
-    def weekSum(weekWork):
-        table1=Table(show_header=True,show_lines=True,title="Table: stats(week)",header_style="bold magenta")
-        table1.add_column("day",style="cyan bold",justify="center")
+    def tableSum(df):
+        if(flag[-1]=='w'):
+            title="Table: stats(week)"
+            col1="day"
+        if(flag[-1]=='M'):
+            title="Table: stats(months)"
+            col1="month"
+        table1=Table(show_header=True,show_lines=True,title=title,header_style="bold magenta")
+        table1.add_column(col1,style="cyan bold",justify="center")
         table1.add_column("work time (hrs)",style="dodger_blue1 bold",justify="center")
-        for i,j in weekWork.items():
+        for i,j in df.items():
             tmp='{0:.2f}'.format(j)
-            table1.add_row(i,tmp)
-
+            table1.add_row(str(i),tmp)
         print('\n')
         console.print(table1)
         return 0
 
-    # flag="1w"
+    # flag="1M"
     df=rwData("",'r',constants['fileName']['pomodoro'])
     grpTotal,total_wrkTime,total,summury,max_consecutive=statusData(flag,df,constants['datetimeStamp'])
-    # grpTotal
-    # total_wrkTime
-    # total
-    # summury
-    # max_consecutive
 
-    # grpTotal.plot(kind='bar')
-    # total_wrkTime.plot(kind='bar')
-    if(flag[-1]!='d'):
-        # total.plot(kind='bar')
-        # max_consecutive.plot(kind='bar')
-        summury=summury.to_dict()
-        if(flag[-1]=='w'):
-            weekSum(total.to_dict()['total_worktime'])
-            print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 7 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
-        if(flag[-1]=='m'):
-            print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 30 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+    subprocess.call(["kitty", "+kitten", "icat", "/tmp/pomodoro.png"])
+
+    summury=summury.to_dict()
+    if(flag[-1]=='w'):
+        tableSum(total.to_dict()['total_worktime'])
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 7 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+    elif(flag[-1]=='m'):
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 30 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+    elif(flag[-1]=='M'):
+        tableSum(total.to_dict()['total_worktime'])
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 12 months): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
     else:
-        print('total hrs: {0:.2f}'.format(total.values[0]))
-        print('max consecutive hrs: {0:.2f}'.format(max_consecutive.values[0]))
+        print("unknown flags")
+        exit()
 
     print('\njobs: {}'.format(", ".join(total_wrkTime.index.values)))
     return 0
