@@ -200,8 +200,8 @@ def genPlot(df,time_flag,past):
         df.plot(kind='bar',ax=ax)
         ax.set_xticklabels(df.month)
     else: # 'm'
-        df.plot(kind='line',ax=ax)
-        # df.plot(kind='line')
+        # df.plot(style='o-',kind='line',ax=ax)
+        df.plot(kind='bar')
     plt.title(title[time_flag])
     plt.grid()
     plt.ylabel("hours")
