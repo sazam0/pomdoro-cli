@@ -13,12 +13,13 @@
 "Pomodoro":["name", "index", "pomodoro", "shortbreak", "longbreak", "interval"]
 },
 "pomodoro":{
-  "common":["c","25","5","30","4"],
-  "moderate":["m","45","15","30","4"],
-  "longer":["l","52","17","30","3"],
-  "marathon":["M","90","30","45","3"],
-  "exercise":["e","2","1","5","5"],
-  "test":["-","3","2","4","2"]
+  "common":["c","25","5","30","5"],
+  "moderate":["m","45","8","20","4"],
+  "longer":["l","55","12","30","3"],
+  "marathon":["M","90","20","45","3"],
+  "extreme":["E","120","30","55","3"],
+  "exercise":["e","3","1","5","7"],
+  "test":["-","3","2","4","3"]
 },
 "datetimeStamp":{
   "year": "%Y",
