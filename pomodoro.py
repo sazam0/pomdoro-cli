@@ -430,9 +430,14 @@ def stats(flag):
         table1=Table(show_header=True,show_lines=True,title=title,header_style="bold magenta")
         table1.add_column(col1,style="cyan bold",justify="center")
         table1.add_column("work time (hrs)",style="dodger_blue1 bold",justify="center")
+        if((flag[-1]=='w')):
+            table1.add_column("remaining time [10] (hrs)",style="light_slate_gray bold",justify="center")
         for i,j in df.items():
             tmp='{0:.2f}'.format(j)
-            table1.add_row(str(i),tmp)
+            if((flag[-1]=='w')):
+                table1.add_row(str(i),tmp,"{0:.2f}".format(10-j))
+            else:
+                table1.add_row(str(i),tmp)
         print('\n')
         console.print(table1)
         return 0
