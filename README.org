@@ -5,6 +5,11 @@ terminal pomodoro app for nextcloud deck cards.
 #+begin_src sh
 sudo apt-get install -y python3-dev libasound2-dev
 #+end_src
+** python packages
+#+begin_src sh
+pip install telegram-send rich seaborn matplotlib pyalsaaudio tqdm simpleaudio
+conda install -c conda-forge python-decouple
+#+end_src
 ** sound files
 put your sound (notification) files in sound directory. set your filenames in ~constants.json~.
 ** environment
