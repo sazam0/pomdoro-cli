@@ -53,7 +53,7 @@ def getTaskList():
     boardId=[j for i in boardId if len(i)>0 for j in i]
     boardId=pd.DataFrame(boardId).sort_values(by=['duedate'])
     boardId['duedate']=boardId['duedate'].apply(lambda x :x.strftime('%d-%m-%Y'))
-    boardId=boardId.head(7).reset_index(drop=True).to_dict('index')
+    boardId=boardId.head(12).reset_index(drop=True).to_dict('index')
     # add default task
     taskList.update(boardId)
     # return [list(boardId.keys()),boardId]
