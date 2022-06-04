@@ -295,23 +295,26 @@ def parseArgs():
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--task", "-t", type=int, default=-1, metavar="int",
-        help="deck task id")
-    group.add_argument("--errand", "-e", type=int, default=-1, metavar="int",
-        help="errand task id")
-    group.add_argument("--taskoptions", "-T", default=False, action="store_true",
-        help="show deck list")
-    group.add_argument("--errandoptions", "-E", default=False, action="store_true",
-        help="show errand list")
-    group.add_argument("--number", "-n", type=int, default=-1, choices=[i for i in range(1,10)],
-        metavar="int", help="task history number")
 
+    group.add_argument("--task", "-t", type=int, default=-1, metavar="int",
+                                        help="deck task id")
+    group.add_argument("--errand", "-e", type=int, default=-1, metavar="int",
+                                        help="errand task id")
+    group.add_argument("--taskoptions", "-T", default=False, action="store_true",
+                                        help="load and show deck list")
+    group.add_argument("--errandoptions", "-E", default=False, action="store_true",
+                                        help="show errand list from the config.json file")
+    group.add_argument("--number", "-n", type=int, default=-1, choices=[i for i in range(1,10)],
+                                        metavar="int", help="task history number")
     parser.add_argument( "--pomodoro", "-p", type=str, default="", choices=help_txt["pomodoro_c"], metavar="str",
-        help=help_txt["pomodoro_h"])
-    parser.add_argument("--stat", "-s", type=str, default="", metavar="str",
-        help="")
+                                        help=help_txt["pomodoro_h"])
     parser.add_argument("--view", "-v", default=False, action="store_true",
-        help="show the pomodoro and history table")
+                                        help="show the pomodoro and history table")
+    parser.add_argument("--silent", "-S", default=False, action="store_true",help="silent notification")
+    parser.add_argument("--stat", "-s", type=str, default="", metavar="str",
+        help="show the pomodoro statistics [int<flag>], w:week (as offest, e.g., previous week = 1w), m:month(month number, e.g., january= 1m), M:year (as offest, e.g., current year = 0M)")
+    group.add_argument("--figure", "-F", default=False, action="store_true",
+                                        help="show figure of the stat")
     # argcomplete.autocomplete(parser)
 
     return parser.parse_args()
