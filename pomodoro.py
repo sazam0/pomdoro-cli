@@ -158,10 +158,24 @@ def telegram_status(duration,flag):
     else:
         pass
     return 0
+# %%
+def playSound(flag,sessionData,silent_flag):
+    if(not silent_flag):
+        mixer = alsaaudio.Mixer()
+        current_vol=mixer.getvolume()[0]
+        low_vol=mixer.setvolume(35)
+        time.sleep(0.5) # wait to settle the volume
+    else:
+        pass
     try:
         if(flag in constants['music'].keys()):
-            sa.WaveObject.from_wave_file("{a}/{b}/{c}".format(a=Path.home(),
-                b=config_env('config_dir'),c=constants['music'][flag])).play().wait_done()
+            if(not silent_flag):
+                sa.WaveObject.from_wave_file("{a}/{b}/{c}".format(a=Path.home(),
+                    b=config_env('config_dir'),c=constants['music'][flag])).play().wait_done()
+                low_vol=mixer.setvolume(current_vol)
+                time.sleep(0.4) # wait to settle the volume
+            else:
+                pass
         else:
             error.log("Error: unknown flag in playSound")
             exit()
@@ -175,7 +189,6 @@ def telegram_status(duration,flag):
         pass
     # sys.stdout.flush()
 
-    low_vol=mixer.setvolume(current_vol)
     return 0
 
 # %%
