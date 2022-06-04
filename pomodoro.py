@@ -498,10 +498,10 @@ def main():
     if(inputs.stat == "" and not inputs.view):
         chosenOne,job = execPomodoro(inputs, pomodoroInputIndex)
         metaData = {"name":chosenOne,"task": job[0] , "comment": job[1]}
-        countdown(pomodoro[chosenOne], metaData)
+        countdown(pomodoro[chosenOne], metaData, inputs.silent)
         # print(metaData)
     elif(inputs.stat!=""):
-        stats(inputs.stat)
+        stats(inputs.stat,inputs.figure)
     else:
         viewStatus(pomodoro)
 
