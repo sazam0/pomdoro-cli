@@ -29,6 +29,7 @@ from rich.progress import Progress
 from rich.logging import RichHandler
 import subprocess
 
+import telegram_send
 # import contextlib
 # from pydub import AudioSegment
 # from pydub.playback import play
@@ -149,6 +150,14 @@ def playSound(flag,sessionData):
     current_vol=mixer.getvolume()[0]
     low_vol=mixer.setvolume(35)
 
+def telegram_status(duration,flag):
+    telegram_txt={'l':"long break : ",'s':"short break: ",'p':"pomodoro: ",'b':"start pomodoro: "}
+    txt=telegram_txt[flag]+str(duration)+" min"
+    if (flag != 'p'):
+        telegram_send.send(messages=[txt])
+    else:
+        pass
+    return 0
     try:
         if(flag in constants['music'].keys()):
             sa.WaveObject.from_wave_file("{a}/{b}/{c}".format(a=Path.home(),
