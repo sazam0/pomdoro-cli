@@ -246,7 +246,7 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
 
 
 # %%
-def countdown(chosenOne, metaData):
+def countdown(chosenOne, metaData, silent_flag):
     pomodoro = chosenOne.pomodoro
     shortBreak = chosenOne.shortbreak
     longBreak = chosenOne.longbreak
@@ -269,23 +269,25 @@ def countdown(chosenOne, metaData):
 
         for i in range(interval):
             # time.sleep(2)
-            sessionData=currentStatus( pomodoro, "pomodoro", minuteBar,
-                currentBar, intervalCounter, True, metaData, sessionData)
+            sessionData=currentStatus( pomodoro, "pomodoro",
+                currentBar, intervalCounter, True, metaData, sessionData,silent_flag)
             intervalBar.update(1)
             intervalCounter += 1
-            playSound("p",sessionData)
+            playSound("p",sessionData, silent_flag)
             intervalBar.refresh()
+            # currentBar.refresh()
             if i + 1 == interval:
-                sessionData=currentStatus(longBreak, "long break", minuteBar,
-                    currentBar, -1, False, metaData,sessionData)
-                playSound("l",sessionData)
+                sessionData=currentStatus(longBreak, "long break",
+                    currentBar, -1, False, metaData,sessionData,silent_flag)
+                playSound("l",sessionData, silent_flag)
                 intervalBar.refresh()
             else:
-                sessionData=currentStatus(shortBreak, "short break", minuteBar,
-                    currentBar, 0, False, metaData,sessionData)
-                playSound("s",sessionData)
+                sessionData=currentStatus(shortBreak, "short break",
+                    currentBar, 0, False, metaData,sessionData,silent_flag)
+                playSound("s",sessionData, silent_flag)
                 intervalBar.refresh()
-
+            telegram_status(pomodoro,'b')
+            x=Confirm.ask("\n[bold bright_magenta]start pomodoro? : ")
         intervalBar.reset()
 
     return 0
@@ -446,7 +448,7 @@ def programStructure():
     return struc
 
 # %%
-def stats(flag):
+def stats(flag,figure_flag):
     def tableSum(df):
         if(flag[-1]=='w'):
             title="Table: stats(week)"
@@ -473,22 +475,32 @@ def stats(flag):
     df=rwData("",'r',constants['fileName']['pomodoro'])
     grpTotal,total_wrkTime,total,summury,max_consecutive=statusData(flag,df,constants['datetimeStamp'])
 
-    subprocess.call(["kitty", "+kitten", "icat", "/tmp/pomodoro.png"])
-
     summury=summury.to_dict()
     if(flag[-1]=='w'):
         tableSum(total.to_dict()['total_worktime'])
-        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 7 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 7 days): {2:.2f} hrs'.format(summury['min'],
+                            summury['max'],summury['avg']))
     elif(flag[-1]=='m'):
-        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 30 days): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 30 days): {2:.2f} hrs'.format(summury['min'],
+                            summury['max'],summury['avg']))
     elif(flag[-1]=='M'):
         tableSum(total.to_dict()['total_worktime'])
-        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 12 months): {2:.2f} hrs'.format(summury['min'], summury['max'],summury['avg']))
+        print('min: {0:.2f} hrs\nmax: {1:.2f} hrs\navg(over 12 months): {2:.2f} hrs'.format(summury['min'],
+                            summury['max'],summury['avg']))
     else:
         print("unknown flags")
         exit()
 
     print('\njobs: {}'.format(", ".join(total_wrkTime.index.values)))
+
+    # subprocess.call(["kitty", "+kitten", "icat", "/tmp/pomodoro.png"])
+    # process=subprocess.Popen(["feh /tmp/pomodoro.png"],shell=True,stdout=subprocess.PIPE)
+    # process=subprocess.Popen(["feh", "/tmp/pomodoro.png"],stdout=subprocess.PIPE)
+    # _=process.communicate()
+    # process.wait()
+    if (figure_flag):
+        subprocess.run("feh /tmp/pomodoro.png",shell=True)
+
     return 0
 
 # %%
