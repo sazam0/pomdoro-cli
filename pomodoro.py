@@ -22,13 +22,12 @@ import alsaaudio
 import matplotlib.pyplot as plt
 import seaborn as sns
 from rich.console import Console
+from rich.prompt import Confirm
 from rich.table import Table
 from rich.style import Style
 from rich.progress import track
 from rich.progress import Progress
 from rich.logging import RichHandler
-import subprocess
-
 import telegram_send
 # import contextlib
 # from pydub import AudioSegment
@@ -145,11 +144,6 @@ def genData(dateTime, pomodoroData):
     return df
 
 # %%
-def playSound(flag,sessionData):
-    mixer = alsaaudio.Mixer()
-    current_vol=mixer.getvolume()[0]
-    low_vol=mixer.setvolume(35)
-
 def telegram_status(duration,flag):
     telegram_txt={'l':"long break : ",'s':"short break: ",'p':"pomodoro: ",'b':"start pomodoro: "}
     txt=telegram_txt[flag]+str(duration)+" min"
@@ -208,14 +202,14 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
     # print(type(sessionData))
     currentBar.total = progress
     currentBar.desc = desc
-    minuteFactor = 1
+    minuteFactor = 60
     tic = time.perf_counter()
 
     currentBar.refresh()
     for _ in range(currentBar.total):
-        for _ in range(int(minuteBar.total / minuteFactor)):
+        for _ in range(minuteFactor): # 60 seconds
             try:
-                time.sleep(minuteFactor)
+                time.sleep(1)
             except KeyboardInterrupt:
                 toc = time.perf_counter()
                 if pomodoroFlag:
@@ -229,12 +223,12 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
                     sessionData.append(genData(x, pomodoroData))
                 # intervalBar.close()
                 currentBar.close()
-                minuteBar.close()
+                # minuteBar.close()
                 exitProcess(sessionData)
                 # exit()
-            minuteBar.update(minuteFactor)
+            # minuteBar.update(minuteFactor)
         currentBar.update(1)
-        minuteBar.reset()
+        # minuteBar.reset()
     currentBar.reset()
 
     pomodoroData["completed"] = True
@@ -258,8 +252,8 @@ def countdown(chosenOne, metaData, silent_flag):
     barFormat='{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}\t'
     intervalBar = tqdm.tqdm(total=interval, desc="interval", position=0,colour="green",bar_format=barFormat)
     currentBar = tqdm.tqdm(position=1,colour="magenta",bar_format=barFormat)
-    minuteBar = tqdm.tqdm(total=int(constants['minute']), desc="minute", position=2,bar_format=barFormat,
-    colour="blue")
+    # minuteBar = tqdm.tqdm(total=int(constants['minute']), desc="minute", position=2,bar_format=barFormat,
+    # colour="blue")
 
     while True:
         if(len(sessionData)>20):
@@ -411,7 +405,8 @@ def execPomodoro(inputs, pomodoroInputIndex):
         selectedJob=errandList(inputs.errand)
 
     chosenOne=pomodoroInputIndex[pomodoroKey]
-    statusTxt = "[bold sky_blue3]starting pomodoro: [dark_sea_green4]{arg1} [sky_blue3]=> [sea_green3]{arg2}".format(arg1=chosenOne,arg2=selectedJob)
+    statusTxt = "[bold sky_blue3]starting pomodoro: [dark_sea_green4]{arg1} [sky_blue3]=> [sea_green3]{arg2} (silent : {arg3})".format(arg1=chosenOne,
+            arg2=selectedJob, arg3=inputs.silent)
     # statusTxt+=" => {arg2}".format(arg1=selectedJob)
     config['history']={str(0):[pomodoroKey,selectedJob,task], **config['history']}
     fromHistory()
