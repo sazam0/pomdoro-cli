@@ -175,7 +175,7 @@ def playSound(flag,sessionData,silent_flag):
             exit()
     except KeyboardInterrupt:
         exitProcess(sessionData)
-    if sys.platform in ("linux", "osx"):
+    if sys.platform in ("linux", "darwin"):
         subprocess.call("clear", shell=True)
     elif sys.platform in ("nt", "dos", "ce"):
         subprocess.call("cls", shell=True)
