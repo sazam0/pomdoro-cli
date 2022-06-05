@@ -18,7 +18,6 @@ from stats import statusData
 import json
 import logging
 import simpleaudio as sa
-import alsaaudio
 import matplotlib.pyplot as plt
 import seaborn as sns
 from rich.console import Console
@@ -154,7 +153,10 @@ def telegram_status(duration,flag):
     return 0
 # %%
 def playSound(flag,sessionData,silent_flag):
+    silent_flag = silent_flag or (sys.platform=='darwin')
+    # do not play sound for mac
     if(not silent_flag):
+        import alsaaudio
         mixer = alsaaudio.Mixer()
         current_vol=mixer.getvolume()[0]
         low_vol=mixer.setvolume(35)
