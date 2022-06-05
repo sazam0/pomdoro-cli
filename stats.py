@@ -162,7 +162,7 @@ def genPlot(df,time_flag,past):
         "M":"date: {date}, year: {year}".format(date=past['date_'],year=past['year']),
         "y":"date: {date}, year: {year}".format(date=past['date_'],year=past['year']),
     }
-    sorter_w = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    sorter_w = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     sorter_M = ['','Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
         'Sep', 'Oct', 'Nov', 'Dec']
     # sorter_w_Index = dict(zip(sorter_w,range(len(sorter_w))))
