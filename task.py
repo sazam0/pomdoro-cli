@@ -3,7 +3,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from decouple import config as config_env
 import pandas as pd
-
+from  datetime import datetime
 # %%
 def deck():
     resp = requests.get(config_env('base_url') ,auth=HTTPBasicAuth(config_env('username'), config_env('password')))
@@ -36,6 +36,9 @@ def cards(board):
     cards['labels']=cards['labels'].apply(lambda x: list(
         x)[0]['title'] if len(list(x)) > 0 else 'nan')
     cards = cards[cards['labels'].isin(['To review', 'Action needed', 'nan'])]
+    # add today's date in case of duedate not defined
+    cards=cards[(~cards['duedate'].isnull()) | (cards['labels']!='nan')]
+    cards['duedate']=cards['duedate'].apply(lambda x: datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z") if (not pd.notnull(x)) else x)
 
     cards=cards[cards['archived']==False][["title","duedate"]]
     cards["duedate"]=pd.to_datetime(cards["duedate"]).dt.date
