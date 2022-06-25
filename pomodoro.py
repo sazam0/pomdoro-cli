@@ -189,8 +189,8 @@ def playSound(flag,sessionData,silent_flag):
 
 # %%
 def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,sessionData,silent_flag):
-    if(silent_flag):
-        telegram_status(progress,desc[0])
+    # if(silent_flag):
+    telegram_status(progress,desc[0])
     x = datetime.datetime.now()
     pomodoroData = {
         "type": desc,
