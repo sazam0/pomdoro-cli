@@ -188,6 +188,14 @@ def playSound(flag,sessionData,silent_flag):
     return 0
 
 # %%
+def take_break(intervalCounter,interval):
+    break_flag='n'
+    x=Confirm.ask("\n[bold bright_magenta]take break? : ")
+    if(x):
+        break_flag = 'l' if ((intervalCounter % interval) == 0) else 's'
+    return break_flag
+
+# %%
 def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,sessionData,silent_flag):
     # if(silent_flag):
     telegram_status(progress,desc[0])
@@ -272,18 +280,31 @@ def countdown(chosenOne, metaData, silent_flag):
             playSound("p",sessionData, silent_flag)
             intervalBar.refresh()
             # currentBar.refresh()
-            if i + 1 == interval:
-                sessionData=currentStatus(longBreak, "long break",
-                    currentBar, -1, False, metaData,sessionData,silent_flag)
-                playSound("l",sessionData, silent_flag)
-                intervalBar.refresh()
-            else:
-                sessionData=currentStatus(shortBreak, "short break",
-                    currentBar, 0, False, metaData,sessionData,silent_flag)
-                playSound("s",sessionData, silent_flag)
-                intervalBar.refresh()
-            telegram_status(pomodoro,'b')
-            x=Confirm.ask("\n[bold bright_magenta]start pomodoro? : ")
+            break_flag=take_break(i+1,interval)
+            if(break_flag != 'n'):
+                # if i + 1 == interval:
+                if (break_flag == 'l'):
+                    sessionData=currentStatus(longBreak, "long break",
+                        currentBar, -1, False, metaData,sessionData,silent_flag)
+                    playSound("l",sessionData, silent_flag)
+                    intervalBar.refresh()
+                # else:
+                elif (break_flag == 's'):
+                    sessionData=currentStatus(shortBreak, "short break",
+                        currentBar, 0, False, metaData,sessionData,silent_flag)
+                    playSound("s",sessionData, silent_flag)
+                    intervalBar.refresh()
+                else:
+                    pass
+                telegram_status(pomodoro,'b')
+                x=Confirm.ask("\n[bold bright_magenta]continue pomodoro? : ")
+                if(not x):
+                    exitProcess(sessionData)
+                else:
+                    pass
+            else: #break_flag == 'n'
+                # intervalBar.refresh()
+                pass
         intervalBar.reset()
 
     return 0
