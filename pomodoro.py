@@ -200,6 +200,9 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
     # if(silent_flag):
     telegram_status(progress,desc[0])
     x = datetime.datetime.now()
+
+    maxContinue_prev =  0 if(interval == 1) else  sessionData[-1].copy().to_dict()["worktime"][0]
+
     pomodoroData = {
         "type": desc,
         "pomodoro": progress,
@@ -229,7 +232,7 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
                     pomodoroData["worktime"] = (
                         interruptedInterval if interruptedInterval > 1.0 else 0.0
                     )
-                    pomodoroData["maxContinue"]=pomodoroData["worktime"]*pomodoroData["consecutiveInterval"]
+                    pomodoroData["maxContinue"]=maxContinue_prev+pomodoroData["worktime"]
                     sessionData.append(genData(x, pomodoroData))
                 # intervalBar.close()
                 currentBar.close()
@@ -243,7 +246,7 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
 
     pomodoroData["completed"] = True
     pomodoroData["worktime"] = progress
-    pomodoroData["maxContinue"]=pomodoroData["worktime"]*pomodoroData["consecutiveInterval"]
+    pomodoroData["maxContinue"] = (maxContinue_prev + progress) if pomodoroFlag else maxContinue_prev
     sessionData.append(genData(x, pomodoroData))
     # print("len : {}".format(len(sessionData)))
     return sessionData
