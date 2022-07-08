@@ -28,3 +28,16 @@ constant_var='constants.json'
 #+begin_src sh
 pomodoro.py -h
 #+end_src
+* hints
+** interrupted session / pause
+when: ~C-c~ during pomodoro is running
+if you choose to continue the interval/pause will be counted as following table
+| pomodoro | consecutiveInterval |
+|----------+---------------------|
+|       -2 |                  -2 |
+** extra session delay
+if delay is longer to switch to break / pomodoro, the delay will be counted as extra session following previous session
+| pomodoro | type                              |
+|----------+-----------------------------------|
+|       -1 | <previous session>                |
+|          | pomodoro, short_break, long_break |
