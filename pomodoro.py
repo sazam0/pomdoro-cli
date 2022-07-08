@@ -2,6 +2,7 @@
 
 # %%
 import time
+import math
 import sys
 import argparse
 from decouple import config as config_env
@@ -190,18 +191,23 @@ def playSound(flag,sessionData,silent_flag):
 # %%
 def take_break(intervalCounter,interval):
     break_flag='n'
-    x=Confirm.ask("\n[bold bright_magenta]take break? : ")
+    try:
+        x=Confirm.ask("\n[bold bright_magenta]take break? : ")
+    except KeyboardInterrupt:
+        break_flag='e'
+        return break_flag
+
     if(x):
         break_flag = 'l' if ((intervalCounter % interval) == 0) else 's'
     return break_flag
 
 # %%
-def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,sessionData,silent_flag):
+def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,sessionData,silent_flag,breakSession=0):
     # if(silent_flag):
     telegram_status(progress,desc[0])
     x = datetime.datetime.now()
 
-    maxContinue_prev =  0 if(interval == 1) else  sessionData[-1].copy().to_dict()["worktime"][0]
+    maxContinue_prev =  0 if(len(sessionData) == 0) else  sessionData[-1].copy().to_dict()["maxContinue"][0]
 
     pomodoroData = {
         "type": desc,
@@ -213,7 +219,7 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
         **metaData,
     }
     # print(type(sessionData))
-    currentBar.total = progress
+    currentBar.total = progress if (breakSession == 0) else breakSession
     currentBar.desc = desc
     minuteFactor = 60
     tic = time.perf_counter()
@@ -226,14 +232,31 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
             except KeyboardInterrupt:
                 toc = time.perf_counter()
                 if pomodoroFlag:
-                    interruptedInterval = round(
-                        (toc - tic) / 60, 4
-                    )  # convert to minute
-                    pomodoroData["worktime"] = (
-                        interruptedInterval if interruptedInterval > 1.0 else 0.0
-                    )
-                    pomodoroData["maxContinue"]=maxContinue_prev+pomodoroData["worktime"]
-                    sessionData.append(genData(x, pomodoroData))
+                    interruptedInterval = round((toc - tic) / 60, 4)  # convert to minute
+
+                    pomodoroData["worktime"] = (interruptedInterval if interruptedInterval > 1.0 else 0.0)
+                    try:
+                        z=Confirm.ask("\n[bold bright_magenta]taking break: continue(y), (n) exit? : ")
+                    except KeyboardInterrupt:
+                        z=False
+
+                    if(z): # continue
+                        toc_interrupt = time.perf_counter() # break time
+                        currentBar.reset()
+                        pomodoroData["consecutiveInterval"]="-2"
+                        pomodoroData["maxContinue"]=0
+                        sessionData.append(genData(x, pomodoroData))
+
+                        #count break time
+                        consecutiveSession=sessionData[-1].copy().to_dict()
+                        pomodoroData= interrupt_session(tic,toc_interrupt,consecutiveSession,metaData)
+
+                        sessionData.append(genData(x, pomodoroData))
+                        return [_,math.ceil(progress - interruptedInterval)]
+                    else: # not continue
+                        pomodoroData["maxContinue"] = maxContinue_prev+pomodoroData["worktime"]
+                        sessionData.append(genData(x, pomodoroData))
+
                 # intervalBar.close()
                 currentBar.close()
                 # minuteBar.close()
@@ -249,8 +272,59 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
     pomodoroData["maxContinue"] = (maxContinue_prev + progress) if pomodoroFlag else maxContinue_prev
     sessionData.append(genData(x, pomodoroData))
     # print("len : {}".format(len(sessionData)))
-    return sessionData
+    return [sessionData,0]
 
+# %%
+def interrupt_session(tic,toc,consecutiveSession,metadata):
+
+    threshold_time = 1.0
+    extraTime=round((toc - tic) / 60, 4)  # convert to minute
+    extraTime= extraTime if extraTime > threshold_time else 0.0 # count xtra time if its larger than 2 min
+
+    maxContinue_prev = consecutiveSession["maxContinue"][0]
+
+    # filter keys from previous entry
+    filter_keys=[i for i,j in constants['datetimeStamp'].items()]
+    filter_keys.append("index")
+    consecutiveSession={key:consecutiveSession[key] for key in consecutiveSession if key not in filter_keys}
+    # new data
+    consecutiveSession["type"]="interrupt_break"
+    consecutiveSession["pomodoro"]="-2"
+    consecutiveSession["consecutiveInterval"]="-2"
+    consecutiveSession["worktime"]=extraTime
+    consecutiveSession["completed"]=False
+    consecutiveSession["maxContinue"]=consecutiveSession["maxContinue"][0]
+    pomodoroData={**consecutiveSession,**metadata}
+
+    return pomodoroData
+
+
+# %%
+def xtra_session(tic,consecutiveSession,intervalCounter,pomodoroFlag,metadata,toc_interrupt=0):
+    # print(consecutiveSession)
+    # exit()
+    threshold_time = 2.0
+    pomodoroData=dict()
+    toc = time.perf_counter()
+    extraTime=round((toc - tic) / 60, 4)  # convert to minute
+    # count if time exceeds threshold_time min
+    extraTime= extraTime if extraTime > threshold_time else 0.0 # count xtra time if its larger than 2 min
+    maxContinue_prev = consecutiveSession["maxContinue"][0]
+    if(extraTime > 0.0):
+        # filter keys from previous entry
+        filter_keys=[i for i,j in constants['datetimeStamp'].items()]
+        filter_keys.append("index")
+        consecutiveSession={key:consecutiveSession[key] for key in consecutiveSession if key not in filter_keys}
+        # new data
+        consecutiveSession["type"]=consecutiveSession["type"][0]
+        consecutiveSession["pomodoro"]="-1"
+        consecutiveSession["worktime"]=extraTime
+        consecutiveSession["completed"]=False
+        consecutiveSession["consecutiveInterval"]=intervalCounter
+        consecutiveSession["maxContinue"] = maxContinue_prev  + extraTime if pomodoroFlag else maxContinue_prev
+        pomodoroData={**consecutiveSession,**metadata}
+
+    return pomodoroData
 
 # %%
 def countdown(chosenOne, metaData, silent_flag):
@@ -258,6 +332,10 @@ def countdown(chosenOne, metaData, silent_flag):
     shortBreak = chosenOne.shortbreak
     longBreak = chosenOne.longbreak
     interval = chosenOne.interval
+    pomodoroFlag=True
+
+    x = datetime.datetime.now()
+    tic = time.perf_counter()
 
     intervalCounter = 1
     sessionData=list()
@@ -276,37 +354,77 @@ def countdown(chosenOne, metaData, silent_flag):
 
         for i in range(interval):
             # time.sleep(2)
-            sessionData=currentStatus( pomodoro, "pomodoro",
-                currentBar, intervalCounter, True, metaData, sessionData,silent_flag)
+            intervalBar.refresh()
+            pomodoroFlag=True
+            sessionData_tmp,breakSession=currentStatus( pomodoro, "pomodoro",
+                currentBar, intervalCounter, pomodoroFlag, metaData, sessionData,silent_flag)
+            # continue from pause / interrupt
+            while(breakSession > 0):
+                intervalBar.refresh()
+                sessionData_tmp,breakSession=currentStatus( pomodoro, "pomodoro",
+                    currentBar, intervalCounter, pomodoroFlag, metaData, sessionData,silent_flag,breakSession=breakSession)
+            sessionData=sessionData_tmp
+
             intervalBar.update(1)
-            intervalCounter += 1
             playSound("p",sessionData, silent_flag)
             intervalBar.refresh()
             # currentBar.refresh()
+            tic = time.perf_counter()
+            x = datetime.datetime.now()
+            # y/n take break
             break_flag=take_break(i+1,interval)
-            if(break_flag != 'n'):
-                # if i + 1 == interval:
-                if (break_flag == 'l'):
-                    sessionData=currentStatus(longBreak, "long break",
-                        currentBar, -1, False, metaData,sessionData,silent_flag)
-                    playSound("l",sessionData, silent_flag)
-                    intervalBar.refresh()
-                # else:
-                elif (break_flag == 's'):
-                    sessionData=currentStatus(shortBreak, "short break",
-                        currentBar, 0, False, metaData,sessionData,silent_flag)
-                    playSound("s",sessionData, silent_flag)
-                    intervalBar.refresh()
-                else:
-                    pass
+            # if reponse takes time
+            consecutiveSession=sessionData[-1].copy().to_dict()
+            pomodoroData=xtra_session(tic,consecutiveSession,intervalCounter,pomodoroFlag,metaData.copy())
+            if (len(pomodoroData) > 0):
+                # intervalCounter += 1
+                sessionData.append(genData(x, pomodoroData))
+
+            intervalCounter += 1
+            # break_flag
+            if(break_flag == 'e'): # canceled/interrupted (Ctrl-c)
+                exitProcess(sessionData)
+            elif(break_flag == 'n'): # continue pomodoro
+                pass
+            elif(break_flag in ['l','s']): # take break
+                pomodoroFlag=False
+                intervalBar.refresh()
+
+                if (break_flag == 's'):
+                    intervalCounter_break = 0
+                    break_desc = "short_break"
+                    break_type= shortBreak
+                else: #break_flag == 'l'
+                    intervalCounter_break = -1
+                    break_desc = "long_break"
+                    break_type= longBreak
+
+                sessionData,_=currentStatus(break_type,break_desc,currentBar,
+                        intervalCounter_break, pomodoroFlag,
+                        metaData,sessionData,silent_flag)
+
+                playSound(break_flag,sessionData, silent_flag)
+                intervalBar.refresh()
                 telegram_status(pomodoro,'b')
-                x=Confirm.ask("\n[bold bright_magenta]continue pomodoro? : ")
-                if(not x):
+
+                tic = time.perf_counter()
+                x = datetime.datetime.now()
+                # continue/exit pomodoro
+
+                try:
+                    z=Confirm.ask("\n[bold bright_magenta]continue pomodoro? : ")
+                except KeyboardInterrupt:
+                    z=False
+
+                consecutiveSession=sessionData[-1].copy().to_dict()
+                pomodoroData = xtra_session(tic,consecutiveSession,intervalCounter_break,pomodoroFlag,metaData.copy())
+                if (len(pomodoroData) > 0):
+                    sessionData.append(genData(x, pomodoroData))
+                if(not z):
                     exitProcess(sessionData)
                 else:
                     pass
-            else: #break_flag == 'n'
-                # intervalBar.refresh()
+            else:
                 pass
         intervalBar.reset()
 
