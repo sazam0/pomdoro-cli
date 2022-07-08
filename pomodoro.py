@@ -277,7 +277,7 @@ def currentStatus(progress, desc, currentBar,interval, pomodoroFlag, metaData,se
 # %%
 def interrupt_session(tic,toc,consecutiveSession,metadata):
 
-    threshold_time = 1.0
+    threshold_time = 5.0
     extraTime=round((toc - tic) / 60, 4)  # convert to minute
     extraTime= extraTime if extraTime > threshold_time else 0.0 # count xtra time if its larger than 2 min
 
