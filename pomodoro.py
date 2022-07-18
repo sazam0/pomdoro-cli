@@ -99,9 +99,9 @@ def viewStatus(pomodoro):
     print('\n')
     console.print(table2)
     print('\n')
-    console.print(table1)
-    print('\n')
     console.print(table3)
+    print('\n')
+    console.print(table1)
     return 0
 # %%
 def exitProcess(sessionData):
